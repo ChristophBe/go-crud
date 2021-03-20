@@ -2,6 +2,7 @@ package types
 
 import "fmt"
 
+// CrudHandlerError holds information to create meaning full http error responses
 type CrudHandlerError struct {
 	Cause      error  `json:"-"`
 	Message    string `json:"message"`

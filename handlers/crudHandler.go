@@ -5,13 +5,22 @@ import (
 	"net/http"
 )
 
+type CrudHandlers interface {
+	Create(w http.ResponseWriter, r *http.Request)
+	GetAll(w http.ResponseWriter, r *http.Request)
+	GetOne(w http.ResponseWriter, r *http.Request)
+	Update(w http.ResponseWriter, r *http.Request)
+	Replace(w http.ResponseWriter, r *http.Request)
+	Delete(w http.ResponseWriter, r *http.Request)
+}
+
 type crudHandlerImpl struct {
 	service        types.Service
 	responseWriter types.ResponseWriter
 	errorWriter    types.ErrorResponseWriter
 }
 
-func NewCrudHandler(service types.Service, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) types.CrudHandlers {
+func NewCrudHandler(service types.Service, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) CrudHandlers {
 	return crudHandlerImpl{
 		service:        service,
 		responseWriter: responseWriter,
