@@ -21,7 +21,7 @@ func (c crudHandlersImpl) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = model.Create(); err != nil {
+	if model, err = model.Create(); err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}

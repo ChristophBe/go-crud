@@ -24,13 +24,13 @@ func (c crudHandlersImpl) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = model.Assign(dto)
+	model, err = model.Assign(dto)
 	if err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}
 
-	if err = model.Update(); err != nil {
+	if model, err = model.Update(); err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}
