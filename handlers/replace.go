@@ -19,7 +19,7 @@ func (c crudHandlersImpl) Replace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if model, err = model.Assign(dto); err != nil {
+	if model, err = dto.AssignToModel(c.service.CreateEmptyModel()); err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}

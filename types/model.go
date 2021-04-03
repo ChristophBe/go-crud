@@ -2,10 +2,6 @@ package types
 
 // Model is the representation of one data Type that is managed by your api.
 type Model interface {
-	// Assign is used to to assign the values of an given dto the current value of the model.
-	// It returns a module with the values of the dto assigned to it, and a error if it fails and otherwise nil.
-	Assign(dto interface{}) (Model, error)
-
 	// Create is used to persist a new instance of that model.
 	// It returns the created model and an error if it fails otherwise nil.
 	Create() (Model, error)

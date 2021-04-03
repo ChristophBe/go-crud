@@ -7,6 +7,9 @@ type Service interface {
 	// ParseDtoFromRequest creates an dto instance based on a request
 	ParseDtoFromRequest(request *http.Request) (Dto, error)
 
+	// CreateEmptyModel returns a empty instance of the model
+	CreateEmptyModel() Model
+
 	// GetOne returns one Model based on a request.
 	GetOne(request *http.Request) (Model, error)
 

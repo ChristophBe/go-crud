@@ -24,7 +24,7 @@ func (c crudHandlersImpl) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err = model.Assign(dto)
+	model, err = dto.AssignToModel(model)
 	if err != nil {
 		c.errorWriter(err, w, r)
 		return

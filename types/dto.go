@@ -8,6 +8,6 @@ type Dto interface {
 	// It will return an error if the validation fails.
 	IsValid(partial bool) error
 
-	// ConvertToModel creates a Model based on the value the dto.
-	ConvertToModel() (Model, error)
+	// AssignToModel assigns the value of the dto to a Model.
+	AssignToModel(model Model) (Model, error)
 }

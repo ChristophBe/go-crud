@@ -15,7 +15,7 @@ func (c crudHandlersImpl) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err := dto.ConvertToModel()
+	model, err := dto.AssignToModel(c.service.CreateEmptyModel())
 	if err != nil {
 		c.errorWriter(err, w, r)
 		return
