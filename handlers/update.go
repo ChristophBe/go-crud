@@ -1,11 +1,17 @@
 package handlers
 
 import (
+	"context"
 	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 )
 
 func (c crudHandlersImpl) Update(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	r = r.WithContext(ctx)
 
 	dto, err := c.service.ParseDtoFromRequest(r)
 	if err != nil {
@@ -13,7 +19,7 @@ func (c crudHandlersImpl) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = dto.IsValid(true); err != nil {
+	if err = dto.IsValid(ctx, true); err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}
@@ -24,13 +30,13 @@ func (c crudHandlersImpl) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err = dto.AssignToModel(model)
+	model, err = dto.AssignToModel(ctx, model)
 	if err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}
 
-	if model, err = model.Update(); err != nil {
+	if model, err = model.Update(ctx); err != nil {
 		c.errorWriter(err, w, r)
 		return
 	}

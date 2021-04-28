@@ -1,6 +1,9 @@
 package types
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
 // Service holds functions to retrieve Model instances  or create Dto objects.
 type Service interface {
@@ -8,7 +11,7 @@ type Service interface {
 	ParseDtoFromRequest(request *http.Request) (Dto, error)
 
 	// CreateEmptyModel returns a empty instance of the model
-	CreateEmptyModel() Model
+	CreateEmptyModel(ctx context.Context) Model
 
 	// GetOne returns one Model based on a request.
 	GetOne(request *http.Request) (Model, error)
