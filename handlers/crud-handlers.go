@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// CrudHandlers aggregates common crud http handlers.
 type CrudHandlers interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	GetAll(w http.ResponseWriter, r *http.Request)
@@ -20,6 +21,7 @@ type crudHandlersImpl struct {
 	errorWriter    types.ErrorResponseWriter
 }
 
+// NewCrudHandlers creates a instance of CrudHandlers.
 func NewCrudHandlers(service types.Service, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) CrudHandlers {
 	return crudHandlersImpl{
 		service:        service,

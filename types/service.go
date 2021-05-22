@@ -5,17 +5,34 @@ import (
 	"net/http"
 )
 
-// Service holds functions to retrieve Model instances  or create Dto objects.
-type Service interface {
-	// ParseDtoFromRequest creates an dto instance based on a request
-	ParseDtoFromRequest(request *http.Request) (Dto, error)
-
-	// CreateEmptyModel returns a empty instance of the model
-	CreateEmptyModel(ctx context.Context) Model
-
+// GetOneService defines functions that are needed for GetOne.
+type GetOneService interface {
 	// GetOne returns one Model based on a request.
 	GetOne(request *http.Request) (Model, error)
+}
 
+// GetAllService defines functions that are needed for GetAll.
+type GetAllService interface {
 	// GetAll returns a slice of Model based on a request.
 	GetAll(request *http.Request) ([]Model, error)
+}
+
+// CreateEmptyModelService defines the CreateEmptyModel function that is used in multiple handlers.
+type CreateEmptyModelService interface {
+	// CreateEmptyModel returns a empty instance of the model
+	CreateEmptyModel(ctx context.Context) Model
+}
+
+// ParseDtoFromRequestService defines the ParseDtoFromRequest function that is used in multiple handlers.
+type ParseDtoFromRequestService interface {
+	// ParseDtoFromRequest creates an dto instance based on a request
+	ParseDtoFromRequest(request *http.Request) (Dto, error)
+}
+
+// Service holds functions to retrieve Model instances  or create Dto objects.
+type Service interface {
+	ParseDtoFromRequestService
+	CreateEmptyModelService
+	GetOneService
+	GetAllService
 }

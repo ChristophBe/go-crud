@@ -1,25 +1,25 @@
 package handlers
 
 import (
-	"context"
+	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 )
 
+// NewGetOneHandler returns a http handler for handling requests one specific model.
+func NewGetOneHandler(service types.GetOneService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		model, err := service.GetOne(r)
+		if err != nil {
+			errorWriter(err, w, r)
+			return
+		}
+		if err = responseWriter(model, http.StatusOK, w, r); err != nil {
+			errorWriter(err, w, r)
+		}
+	}
+}
+
+// GetOne returns a http handler for handling requests one specific model.
 func (c crudHandlersImpl) GetOne(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	r = r.WithContext(ctx)
-
-	model, err := c.service.GetOne(r)
-	if err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if err = c.responseWriter(model, http.StatusOK, w, r); err != nil {
-		c.errorWriter(err, w, r)
-	}
-
+	NewGetOneHandler(c.service, c.responseWriter, c.errorWriter)(w, r)
 }
