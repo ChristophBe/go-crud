@@ -1,41 +1,52 @@
 package handlers
 
 import (
-	"context"
 	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 )
 
-func (c crudHandlersImpl) Replace(w http.ResponseWriter, r *http.Request) {
+// NewReplaceHandler creates a http.Handler that handles replacing an exing model.
+func NewReplaceHandler(service types.ReplaceService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ctx := request.Context()
 
-	ctx := r.Context()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	r = r.WithContext(ctx)
+		var (
+			dto   types.Dto
+			model types.Model
+			err   error
+		)
+		if dto, err = service.ParseDtoFromRequest(request); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
 
-	model, err := c.service.GetOne(r)
-	var dto types.Dto
-	if dto, err = c.service.ParseDtoFromRequest(r); err != nil {
-		c.errorWriter(err, w, r)
-		return
+		if err = dto.IsValid(ctx, false); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if model, err = service.GetOne(request); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if model, err = dto.AssignToModel(ctx, model); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if model, err = model.Update(ctx); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if err = responseWriter(model, http.StatusAccepted, writer, request); err != nil {
+			errorWriter(err, writer, request)
+		}
 	}
+}
 
-	if err = dto.IsValid(ctx, false); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if model, err = dto.AssignToModel(ctx, c.service.CreateEmptyModel(ctx)); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if model, err = model.Update(ctx); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if err = c.responseWriter(model, http.StatusAccepted, w, r); err != nil {
-		c.errorWriter(err, w, r)
-	}
+// Replace is a http.Handler that handles replacing an exing model.
+func (c crudHandlersImpl) Replace(writer http.ResponseWriter, request *http.Request) {
+	NewReplaceHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
 }
