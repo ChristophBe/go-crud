@@ -29,6 +29,12 @@ type ParseDtoFromRequestService interface {
 	ParseDtoFromRequest(request *http.Request) (Dto, error)
 }
 
+// CreateService defines functions that are need for the create model handler
+type CreateService interface {
+	CreateEmptyModelService
+	ParseDtoFromRequestService
+}
+
 // Service holds functions to retrieve Model instances  or create Dto objects.
 type Service interface {
 	ParseDtoFromRequestService

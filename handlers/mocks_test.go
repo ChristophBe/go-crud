@@ -28,6 +28,10 @@ type modelErrorHolder struct {
 	model types.Model
 	err   error
 }
+type dtoErrorHolder struct {
+	dto types.Dto
+	err error
+}
 type modelMock struct {
 	value        string
 	createResult modelErrorHolder
@@ -36,11 +40,11 @@ type modelMock struct {
 }
 
 func (m modelMock) Create(_ context.Context) (types.Model, error) {
-	return m.updateResult.model, m.updateResult.err
+	return m.createResult.model, m.createResult.err
 }
 
 func (m modelMock) Update(_ context.Context) (types.Model, error) {
-	return m.createResult.model, m.createResult.err
+	return m.updateResult.model, m.updateResult.err
 }
 
 func (m modelMock) Delete(_ context.Context) error {
@@ -72,4 +76,17 @@ func newMockResponseWriter(recorder *responseWriterRecorder, err error) types.Re
 		recorder.status = status
 		return err
 	}
+}
+
+type dtoMock struct {
+	validationError   error
+	assignModelResult modelErrorHolder
+}
+
+func (d dtoMock) IsValid(_ context.Context, _ bool) error {
+	return d.validationError
+}
+
+func (d dtoMock) AssignToModel(_ context.Context, _ types.Model) (types.Model, error) {
+	return d.assignModelResult.model, d.assignModelResult.err
 }
