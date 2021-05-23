@@ -15,6 +15,15 @@ func (m getOneServiceMock) GetOne(_ *http.Request) (types.Model, error) {
 	return m.model, m.err
 }
 
+type getAllServiceMock struct {
+	models []types.Model
+	err    error
+}
+
+func (m getAllServiceMock) GetAll(_ *http.Request) ([]types.Model, error) {
+	return m.models, m.err
+}
+
 type modelErrorHolder struct {
 	model types.Model
 	err   error

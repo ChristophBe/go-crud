@@ -1,24 +1,26 @@
 package handlers
 
 import (
-	"context"
+	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 )
 
-func (c crudHandlersImpl) GetAll(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	r = r.WithContext(ctx)
+// NewGetAllHandler returns a http.Handler for handling requests a list of model.
+func NewGetAllHandler(service types.GetAllService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		models, err := service.GetAll(request)
+		if err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
 
-	model, err := c.service.GetAll(r)
-	if err != nil {
-		c.errorWriter(err, w, r)
-		return
+		if err = responseWriter(models, http.StatusOK, writer, request); err != nil {
+			errorWriter(err, writer, request)
+		}
 	}
+}
 
-	if err = c.responseWriter(model, http.StatusOK, w, r); err != nil {
-		c.errorWriter(err, w, r)
-	}
-
+// GetAll is a http.Handler for fetch a list of model.
+func (c crudHandlersImpl) GetAll(writer http.ResponseWriter, request *http.Request) {
+	NewGetAllHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
 }
