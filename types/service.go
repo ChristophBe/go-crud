@@ -35,6 +35,12 @@ type CreateService interface {
 	ParseDtoFromRequestService
 }
 
+// UpdateService defines functions that are need for the update model handler
+type UpdateService interface {
+	GetOneService
+	ParseDtoFromRequestService
+}
+
 // Service holds functions to retrieve Model instances  or create Dto objects.
 type Service interface {
 	ParseDtoFromRequestService
