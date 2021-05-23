@@ -1,40 +1,43 @@
 package handlers
 
 import (
-	"context"
+	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 )
 
-func (c crudHandlersImpl) Create(w http.ResponseWriter, r *http.Request) {
+// NewCreatHandler creates a http.Handler that handles the creation of a model
+func NewCreatHandler(service types.CreateService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ctx := request.Context()
+		dto, err := service.ParseDtoFromRequest(request)
+		if err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
 
-	ctx := r.Context()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	r = r.WithContext(ctx)
+		if err = dto.IsValid(ctx, false); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
 
-	dto, err := c.service.ParseDtoFromRequest(r)
-	if err != nil {
-		c.errorWriter(err, w, r)
-		return
+		model, err := dto.AssignToModel(ctx, service.CreateEmptyModel(ctx))
+		if err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if model, err = model.Create(ctx); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if err = responseWriter(model, http.StatusAccepted, writer, request); err != nil {
+			errorWriter(err, writer, request)
+		}
 	}
+}
 
-	if err = dto.IsValid(ctx, false); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	model, err := dto.AssignToModel(ctx, c.service.CreateEmptyModel(ctx))
-	if err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if model, err = model.Create(ctx); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if err = c.responseWriter(model, http.StatusAccepted, w, r); err != nil {
-		c.errorWriter(err, w, r)
-	}
+// Create is a http.Handler that handles the creation of a model
+func (c crudHandlersImpl) Create(writer http.ResponseWriter, request *http.Request) {
+	NewCreatHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
 }
