@@ -1,47 +1,49 @@
 package handlers
 
 import (
-	"context"
 	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 )
 
-func (c crudHandlersImpl) Update(w http.ResponseWriter, r *http.Request) {
+// NewUpdateHandler creates a http.Handler that handles partial updates for existing models.
+func NewUpdateHandler(service types.UpdateService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ctx := request.Context()
+		dto, err := service.ParseDtoFromRequest(request)
+		if err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
 
-	ctx := r.Context()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	r = r.WithContext(ctx)
+		if err = dto.IsValid(ctx, true); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
 
-	dto, err := c.service.ParseDtoFromRequest(r)
-	if err != nil {
-		c.errorWriter(err, w, r)
-		return
+		var model types.Model
+		if model, err = service.GetOne(request); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		model, err = dto.AssignToModel(ctx, model)
+		if err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if model, err = model.Update(ctx); err != nil {
+			errorWriter(err, writer, request)
+			return
+		}
+
+		if err = responseWriter(model, http.StatusAccepted, writer, request); err != nil {
+			errorWriter(err, writer, request)
+		}
 	}
+}
 
-	if err = dto.IsValid(ctx, true); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	var model types.Model
-	if model, err = c.service.GetOne(r); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	model, err = dto.AssignToModel(ctx, model)
-	if err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if model, err = model.Update(ctx); err != nil {
-		c.errorWriter(err, w, r)
-		return
-	}
-
-	if err = c.responseWriter(model, http.StatusAccepted, w, r); err != nil {
-		c.errorWriter(err, w, r)
-	}
+// Update is a http.Handler that handles partial updates for existing models.
+func (c crudHandlersImpl) Update(writer http.ResponseWriter, request *http.Request) {
+	NewUpdateHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
 }
