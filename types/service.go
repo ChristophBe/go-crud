@@ -41,6 +41,13 @@ type UpdateService interface {
 	ParseDtoFromRequestService
 }
 
+// ReplaceService defines functions that are need for the replace model handler
+type ReplaceService interface {
+	GetOneService
+	CreateEmptyModelService
+	ParseDtoFromRequestService
+}
+
 // Service holds functions to retrieve Model instances  or create Dto objects.
 type Service interface {
 	ParseDtoFromRequestService
