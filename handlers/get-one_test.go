@@ -1,38 +1,11 @@
 package handlers
 
 import (
-	"context"
 	"errors"
-	"github.com/ChristophBe/go-crud/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-type mockService struct {
-	model mockModel
-	err   error
-}
-
-func (m mockService) GetOne(_ *http.Request) (types.Model, error) {
-	return m.model, m.err
-}
-
-type mockModel struct {
-	value string
-}
-
-func (m mockModel) Create(ctx context.Context) (types.Model, error) {
-	panic("implement me")
-}
-
-func (m mockModel) Update(ctx context.Context) (types.Model, error) {
-	panic("implement me")
-}
-
-func (m mockModel) Delete(ctx context.Context) error {
-	panic("implement me")
-}
 
 func TestCrudHandlersImpl_GetOne(t *testing.T) {
 
@@ -40,27 +13,27 @@ func TestCrudHandlersImpl_GetOne(t *testing.T) {
 
 	tt := []struct {
 		name string
-		mockService
+		getOneServiceMock
 		responseWriterError error
 		expectedError       error
 	}{
 		{
 			name: "getOne returns error",
-			mockService: mockService{
+			getOneServiceMock: getOneServiceMock{
 				err: errors.New("test"),
 			},
 			expectedError: errors.New("test"),
 		},
 		{
 			name:                "response writer returns error",
-			mockService:         mockService{},
+			getOneServiceMock:   getOneServiceMock{},
 			responseWriterError: errors.New("test-error"),
 			expectedError:       errors.New("test-error"),
 		},
 		{
 			name: "getOne returns model",
-			mockService: mockService{
-				model: mockModel{value: "testValue"},
+			getOneServiceMock: getOneServiceMock{
+				model: modelMock{value: "testValue"},
 			},
 			expectedError: nil,
 		},
@@ -69,51 +42,36 @@ func TestCrudHandlersImpl_GetOne(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 
-			responseWriterValues := struct {
-				called       bool
-				model        interface{}
-				resultStatus int
-			}{
-				called: false,
-			}
-			errorWriterValues := struct {
-				err error
-			}{}
+			responseRecorder := new(responseWriterRecorder)
+			errorRecorder := new(errorWriterRecorder)
 
-			responseWriter := func(model interface{}, resultStatus int, _ http.ResponseWriter, _ *http.Request) error {
-				responseWriterValues.called = true
-				responseWriterValues.model = model
-				responseWriterValues.resultStatus = resultStatus
-				return tc.responseWriterError
-			}
+			responseWriter := newMockResponseWriter(responseRecorder, tc.responseWriterError)
 
-			errorWriter := func(err error, _ http.ResponseWriter, _ *http.Request) {
-				errorWriterValues.err = err
-			}
+			errorWriter := newMockErrorWriter(errorRecorder)
 
-			handler := NewGetOneHandler(tc.mockService, responseWriter, errorWriter)
+			handler := NewGetOneHandler(tc.getOneServiceMock, responseWriter, errorWriter)
 			w := httptest.ResponseRecorder{}
 			handler.ServeHTTP(&w, new(http.Request))
 
 			if tc.expectedError != nil {
 
 				// expect error writer to be called
-				if errorWriterValues.err == nil {
+				if errorRecorder.err == nil {
 					t.Error("error to be not nil")
 					return
 				}
-				if errorWriterValues.err.Error() != tc.expectedError.Error() {
-					t.Errorf("expected err to be %v, got %v", tc.expectedError, errorWriterValues.err)
+				if errorRecorder.err.Error() != tc.expectedError.Error() {
+					t.Errorf("expected err to be %v, got %v", tc.expectedError, errorRecorder.err)
 				}
 				return
 			}
-			if tc.mockService.err == nil {
+			if tc.getOneServiceMock.err == nil {
 				// expect response writer to be called
 
-				if responseWriterValues.resultStatus != expectedResponseStatus {
-					t.Errorf("expected response status to be %v, got %v", expectedResponseStatus, responseWriterValues.resultStatus)
+				if responseRecorder.status != expectedResponseStatus {
+					t.Errorf("expected response status to be %v, got %v", expectedResponseStatus, responseRecorder.status)
 				}
-				resultingModel, ok := responseWriterValues.model.(mockModel)
+				resultingModel, ok := responseRecorder.body.(modelMock)
 				if !ok {
 					t.Fatal("failed to cast model")
 				}
@@ -124,11 +82,10 @@ func TestCrudHandlersImpl_GetOne(t *testing.T) {
 
 			} else {
 				// expect response not to called
-				if responseWriterValues.called {
+				if responseRecorder.called {
 					t.Error("expected response writer not to be called")
 				}
 			}
 		})
 	}
-
 }
