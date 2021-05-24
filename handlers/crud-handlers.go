@@ -15,12 +15,6 @@ type CrudHandlers interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-type crudHandlersImpl struct {
-	service        types.Service
-	responseWriter types.ResponseWriter
-	errorWriter    types.ErrorResponseWriter
-}
-
 // NewCrudHandlers creates a instance of CrudHandlers.
 func NewCrudHandlers(service types.Service, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) CrudHandlers {
 	return crudHandlersImpl{
@@ -28,4 +22,40 @@ func NewCrudHandlers(service types.Service, responseWriter types.ResponseWriter,
 		responseWriter: responseWriter,
 		errorWriter:    errorWriter,
 	}
+}
+
+type crudHandlersImpl struct {
+	service        types.Service
+	responseWriter types.ResponseWriter
+	errorWriter    types.ErrorResponseWriter
+}
+
+// Create is a http.Handler that handles the creation of a model
+func (c crudHandlersImpl) Create(writer http.ResponseWriter, request *http.Request) {
+	NewCreatHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
+}
+
+// GetAll is a http.Handler for fetch a list of model.
+func (c crudHandlersImpl) GetAll(writer http.ResponseWriter, request *http.Request) {
+	NewGetAllHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
+}
+
+// GetOne returns a http handler for handling requests one specific model.
+func (c crudHandlersImpl) GetOne(w http.ResponseWriter, r *http.Request) {
+	NewGetOneHandler(c.service, c.responseWriter, c.errorWriter)(w, r)
+}
+
+// Update is a http.Handler that handles partial updates for existing models.
+func (c crudHandlersImpl) Update(writer http.ResponseWriter, request *http.Request) {
+	NewUpdateHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
+}
+
+// Replace is a http.Handler that handles replacing an exing model.
+func (c crudHandlersImpl) Replace(writer http.ResponseWriter, request *http.Request) {
+	NewReplaceHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
+}
+
+// Delete is a http handler for handling the deletion of specific model.
+func (c crudHandlersImpl) Delete(writer http.ResponseWriter, request *http.Request) {
+	NewDeleteHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
 }

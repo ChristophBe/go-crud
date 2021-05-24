@@ -24,8 +24,3 @@ func NewDeleteHandler(service types.GetOneService, responseWriter types.Response
 		}
 	}
 }
-
-// Delete is a http handler for handling the deletion of specific model.
-func (c crudHandlersImpl) Delete(writer http.ResponseWriter, request *http.Request) {
-	NewDeleteHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
-}

@@ -45,8 +45,3 @@ func NewReplaceHandler(service types.ReplaceService, responseWriter types.Respon
 		}
 	}
 }
-
-// Replace is a http.Handler that handles replacing an exing model.
-func (c crudHandlersImpl) Replace(writer http.ResponseWriter, request *http.Request) {
-	NewReplaceHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
-}
