@@ -18,8 +18,3 @@ func NewGetOneHandler(service types.GetOneService, responseWriter types.Response
 		}
 	}
 }
-
-// GetOne returns a http handler for handling requests one specific model.
-func (c crudHandlersImpl) GetOne(w http.ResponseWriter, r *http.Request) {
-	NewGetOneHandler(c.service, c.responseWriter, c.errorWriter)(w, r)
-}

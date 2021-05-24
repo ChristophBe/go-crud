@@ -36,8 +36,3 @@ func NewCreatHandler(service types.CreateService, responseWriter types.ResponseW
 		}
 	}
 }
-
-// Create is a http.Handler that handles the creation of a model
-func (c crudHandlersImpl) Create(writer http.ResponseWriter, request *http.Request) {
-	NewCreatHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
-}

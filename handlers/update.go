@@ -42,8 +42,3 @@ func NewUpdateHandler(service types.UpdateService, responseWriter types.Response
 		}
 	}
 }
-
-// Update is a http.Handler that handles partial updates for existing models.
-func (c crudHandlersImpl) Update(writer http.ResponseWriter, request *http.Request) {
-	NewUpdateHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
-}

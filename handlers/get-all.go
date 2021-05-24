@@ -19,8 +19,3 @@ func NewGetAllHandler(service types.GetAllService, responseWriter types.Response
 		}
 	}
 }
-
-// GetAll is a http.Handler for fetch a list of model.
-func (c crudHandlersImpl) GetAll(writer http.ResponseWriter, request *http.Request) {
-	NewGetAllHandler(c.service, c.responseWriter, c.errorWriter).ServeHTTP(writer, request)
-}
