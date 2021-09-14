@@ -19,14 +19,22 @@ type GetAllService interface {
 
 // CreateEmptyModelService defines the CreateEmptyModel function that is used in multiple handlers.
 type CreateEmptyModelService interface {
-	// CreateEmptyModel returns a empty instance of the model
+	// CreateEmptyModel returns an empty instance of the model
 	CreateEmptyModel(ctx context.Context) Model
 }
 
 // ParseDtoFromRequestService defines the ParseDtoFromRequest function that is used in multiple handlers.
 type ParseDtoFromRequestService interface {
-	// ParseDtoFromRequest creates an dto instance based on a request
+	// ParseDtoFromRequest creates a dto instance based on a request
 	ParseDtoFromRequest(request *http.Request) (Dto, error)
+}
+
+// FunctionHandlerService defines a service to handle a request by a  Function
+type FunctionHandlerService interface {
+	// ParseValidatableFromRequest parses a Validatable for the request
+	ParseValidatableFromRequest(request *http.Request) (Validatable, error)
+	// Function a function generates a response based on a Validatable
+	Function(ctx context.Context, dto Validatable) (interface{}, int, error)
 }
 
 // CreateService defines functions that are need for the create model handler

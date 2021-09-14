@@ -24,6 +24,21 @@ func (m getAllServiceMock) GetAll(_ *http.Request) ([]types.Model, error) {
 	return m.models, m.err
 }
 
+type functionServiceMock struct {
+	functionErr    error
+	dtoErr         error
+	result         interface{}
+	responseStatus int
+	dto            types.Validatable
+}
+
+func (f functionServiceMock) Function(_ context.Context, _ types.Validatable) (interface{}, int, error) {
+	return f.result, f.responseStatus, f.functionErr
+}
+func (f functionServiceMock) ParseValidatableFromRequest(_ *http.Request) (types.Validatable, error) {
+	return f.dto, f.dtoErr
+}
+
 type modelErrorHolder struct {
 	model types.Model
 	err   error
