@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/ChristophBe/go-crud/types"
+	"github.com/ChristophBe/grud/types"
 	"net/http"
 )
 

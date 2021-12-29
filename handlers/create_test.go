@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/ChristophBe/go-crud/types"
+	"github.com/ChristophBe/grud/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"
