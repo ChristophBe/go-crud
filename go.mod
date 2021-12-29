@@ -1,3 +1,3 @@
-module github.com/ChristophBe/go-crud
+module github.com/ChristophBe/grud
 
 go 1.15
