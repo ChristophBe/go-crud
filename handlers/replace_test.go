@@ -11,7 +11,6 @@ import (
 type replaceServiceMock struct {
 	getOneServiceMock
 	updateModelServiceMock
-	createEmptyModelServiceMock
 	parseDtoFromRequestServiceMock
 }
 

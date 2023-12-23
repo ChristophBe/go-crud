@@ -21,14 +21,6 @@ func (p parseDtoFromRequestServiceMock) ParseDtoFromRequest(_ *http.Request) (ty
 	return p.dto, p.err
 }
 
-type createEmptyModelServiceMock struct {
-	emptyModel types.Model
-}
-
-func (c createEmptyModelServiceMock) CreateEmptyModel(_ context.Context) types.Model {
-	return c.emptyModel
-}
-
 type createModelServiceMock struct {
 	createdModel testModel
 	err          error

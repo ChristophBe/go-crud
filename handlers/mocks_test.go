@@ -53,25 +53,6 @@ func (u updateModelServiceMock) UpdateModel(_ context.Context, _ testModel) (tes
 	return u.model, u.err
 }
 
-type modelMock struct {
-	value        string
-	createResult modelErrorHolder[types.Model]
-	updateResult modelErrorHolder[types.Model]
-	deleteResult error
-}
-
-func (m modelMock) Create(_ context.Context) (types.Model, error) {
-	return m.createResult.model, m.createResult.err
-}
-
-func (m modelMock) Update(_ context.Context) (types.Model, error) {
-	return m.updateResult.model, m.updateResult.err
-}
-
-func (m modelMock) Delete(_ context.Context) error {
-	return m.deleteResult
-}
-
 type errorWriterRecorder struct {
 	called bool
 	err    error
