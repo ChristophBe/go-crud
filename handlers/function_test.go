@@ -25,7 +25,7 @@ func TestCrudHandlersImpl_Function(t *testing.T) {
 		{
 			name: "dto invalid",
 			service: functionServiceMock{
-				dto: dtoMock{
+				dto: dtoMock[any]{
 					validationError: errors.New("test"),
 				},
 			},
@@ -34,7 +34,7 @@ func TestCrudHandlersImpl_Function(t *testing.T) {
 		{
 			name: "function returns error invalid",
 			service: functionServiceMock{
-				dto:         dtoMock{},
+				dto:         dtoMock[any]{},
 				functionErr: errors.New("test"),
 			},
 			expectedError: errors.New("test"),
@@ -42,7 +42,7 @@ func TestCrudHandlersImpl_Function(t *testing.T) {
 		{
 			name: "function succeeded invalid",
 			service: functionServiceMock{
-				dto:            dtoMock{},
+				dto:            dtoMock[any]{},
 				responseStatus: http.StatusOK,
 			},
 			expectedError: nil,
@@ -50,7 +50,7 @@ func TestCrudHandlersImpl_Function(t *testing.T) {
 		{
 			name: "response writer returns error",
 			service: functionServiceMock{
-				dto:            dtoMock{},
+				dto:            dtoMock[any]{},
 				responseStatus: http.StatusOK,
 			},
 			responseWriterError: errors.New("test-error"),
@@ -68,7 +68,7 @@ func TestCrudHandlersImpl_Function(t *testing.T) {
 
 			errorWriter := newMockErrorWriter(errorRecorder)
 
-			handler := NewFunctionHandler(tc.service, responseWriter, errorWriter)
+			handler := NewFunctionHandler[dtoMock[any], any](tc.service, responseWriter, errorWriter)
 			w := httptest.ResponseRecorder{}
 			handler.ServeHTTP(&w, new(http.Request))
 

@@ -10,6 +10,7 @@ import (
 
 type updateServiceMock struct {
 	getOneServiceMock
+	updateModelServiceMock
 	parseDtoFromRequestServiceMock
 }
 
@@ -19,10 +20,10 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 
 	tt := []struct {
 		name                string
-		service             types.UpdateService
+		service             types.UpdateService[testModel]
 		responseWriterError error
 		expectedError       error
-		resultModel         modelMock
+		resultModel         testModel
 	}{
 		{
 			name: "parse dto form request turns error",
@@ -38,7 +39,7 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 			name: "dto is invalid",
 			service: updateServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
+					dto: dtoMock[testModel]{
 						validationError: errors.New("test"),
 					},
 				},
@@ -49,7 +50,7 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 			name: "getting exiting to model failed",
 			service: updateServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
+					dto: dtoMock[testModel]{
 						validationError: nil,
 					},
 				},
@@ -63,8 +64,8 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 			name: "dto assign to model failed",
 			service: updateServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
 							err: errors.New("test"),
 						},
 					},
@@ -76,18 +77,21 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 			name: "model save model failed",
 			service: updateServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
-							model: modelMock{
-								updateResult: modelErrorHolder{
-									err: errors.New("test"),
-								},
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
+							model: testModel{
+								Value: "test-value",
 							},
 						},
 					},
 				},
+				updateModelServiceMock: updateModelServiceMock{
+					err: errors.New("test"),
+				},
 				getOneServiceMock: getOneServiceMock{
-					model: modelMock{},
+					model: testModel{
+						Value: "test-value",
+					},
 				},
 			},
 			expectedError: errors.New("test"),
@@ -96,17 +100,16 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 			name: "response writer returns error",
 			service: updateServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
-							model: modelMock{
-								createResult: modelErrorHolder{
-									model: modelMock{
-										value: "test-value",
-									},
-								},
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
+							model: testModel{
+								Value: "test-value",
 							},
 						},
 					},
+				},
+				updateModelServiceMock: updateModelServiceMock{
+					model: testModel{Value: "test-value"},
 				},
 			},
 			responseWriterError: errors.New("test-error"),
@@ -116,22 +119,24 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 			name: "success",
 			service: updateServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
-							model: modelMock{
-								updateResult: modelErrorHolder{
-									model: modelMock{
-										value: "test-value",
-									},
-								},
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
+							model: testModel{
+
+								Value: "test-value",
 							},
 						},
 					},
 				},
+				updateModelServiceMock: updateModelServiceMock{
+					model: testModel{
+						Value: "test-value",
+					},
+				},
 			},
 			expectedError: nil,
-			resultModel: modelMock{
-				value: "test-value",
+			resultModel: testModel{
+				Value: "test-value",
 			},
 		},
 	}
@@ -168,13 +173,13 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 				if responseRecorder.status != expectedResponseStatus {
 					t.Errorf("expected response status to be %v, got %v", expectedResponseStatus, responseRecorder.status)
 				}
-				result, ok := responseRecorder.body.(modelMock)
+				result, ok := responseRecorder.body.(testModel)
 				if !ok {
 					t.Fatal("failed to cast model")
 				}
 
-				if tc.resultModel.value != result.value {
-					t.Errorf("expected result value to be %v, got %v", tc.resultModel.value, result.value)
+				if tc.resultModel.Value != result.Value {
+					t.Errorf("expected result value to be %v, got %v", tc.resultModel.Value, result.Value)
 				}
 
 			} else {

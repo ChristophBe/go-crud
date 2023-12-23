@@ -5,8 +5,8 @@ import (
 	"net/http"
 )
 
-// NewCreatHandler creates a http.Handler that handles the creation of a model
-func NewCreatHandler(service types.CreateService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+// NewCreateHandler creates a http.Handler that handles the creation of a model
+func NewCreateHandler[Model any](service types.CreateService[Model], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 		dto, err := service.ParseDtoFromRequest(request)
@@ -20,13 +20,14 @@ func NewCreatHandler(service types.CreateService, responseWriter types.ResponseW
 			return
 		}
 
-		model, err := dto.AssignToModel(ctx, service.CreateEmptyModel(ctx))
+		var model Model
+		model, err = dto.AssignToModel(ctx, model)
 		if err != nil {
 			errorWriter(err, writer, request)
 			return
 		}
 
-		if model, err = model.Create(ctx); err != nil {
+		if model, err = service.CreateModel(ctx, model); err != nil {
 			errorWriter(err, writer, request)
 			return
 		}

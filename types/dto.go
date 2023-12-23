@@ -12,7 +12,7 @@ type Validatable interface {
 
 // Dto is the type that contains the structure of the data that your api expect to receive.
 // It contains a method to validate itself and to convert it to its corresponding model object.
-type Dto interface {
+type Dto[Model any] interface {
 	Validatable
 
 	// AssignToModel assigns the value of the dto to a Model.

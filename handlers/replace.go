@@ -6,13 +6,13 @@ import (
 )
 
 // NewReplaceHandler creates a http.Handler that handles replacing an exing model.
-func NewReplaceHandler(service types.ReplaceService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewReplaceHandler[M types.ModelTypeInterface](service types.ReplaceService[M], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 
 		var (
-			dto   types.Dto
-			model types.Model
+			dto   types.Dto[M]
+			model M
 			err   error
 		)
 		if dto, err = service.ParseDtoFromRequest(request); err != nil {
@@ -35,7 +35,7 @@ func NewReplaceHandler(service types.ReplaceService, responseWriter types.Respon
 			return
 		}
 
-		if model, err = model.Update(ctx); err != nil {
+		if model, err = service.UpdateModel(ctx, model); err != nil {
 			errorWriter(err, writer, request)
 			return
 		}

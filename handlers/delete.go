@@ -6,7 +6,7 @@ import (
 )
 
 // NewDeleteHandler returns a http handler for that handles the deletion of one specific model.
-func NewDeleteHandler(service types.GetOneService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewDeleteHandler[M types.ModelTypeInterface](service types.DeleteService[M], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		model, err := service.GetOne(request)
 		if err != nil {
@@ -14,7 +14,7 @@ func NewDeleteHandler(service types.GetOneService, responseWriter types.Response
 			return
 		}
 
-		if err = model.Delete(request.Context()); err != nil {
+		if err = service.DeleteModel(request.Context(), model); err != nil {
 			errorWriter(err, writer, request)
 			return
 		}

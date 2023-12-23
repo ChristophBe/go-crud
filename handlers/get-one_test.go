@@ -33,7 +33,7 @@ func TestCrudHandlersImpl_GetOne(t *testing.T) {
 		{
 			name: "getOne returns model",
 			getOneServiceMock: getOneServiceMock{
-				model: modelMock{value: "testValue"},
+				model: testModel{Value: "testValue"},
 			},
 			expectedError: nil,
 		},
@@ -49,7 +49,7 @@ func TestCrudHandlersImpl_GetOne(t *testing.T) {
 
 			errorWriter := newMockErrorWriter(errorRecorder)
 
-			handler := NewGetOneHandler(tc.getOneServiceMock, responseWriter, errorWriter)
+			handler := NewGetOneHandler[testModel](tc.getOneServiceMock, responseWriter, errorWriter)
 			w := httptest.ResponseRecorder{}
 			handler.ServeHTTP(&w, new(http.Request))
 
@@ -71,13 +71,13 @@ func TestCrudHandlersImpl_GetOne(t *testing.T) {
 				if responseRecorder.status != expectedResponseStatus {
 					t.Errorf("expected response status to be %v, got %v", expectedResponseStatus, responseRecorder.status)
 				}
-				resultingModel, ok := responseRecorder.body.(modelMock)
+				resultingModel, ok := responseRecorder.body.(testModel)
 				if !ok {
 					t.Fatal("failed to cast model")
 				}
 
-				if resultingModel.value != tc.model.value {
-					t.Errorf("expected model model to be %v, got %v", tc.model.value, resultingModel.value)
+				if resultingModel.Value != tc.model.Value {
+					t.Errorf("expected model model to be %v, got %v", tc.model.Value, resultingModel.Value)
 				}
 
 			} else {

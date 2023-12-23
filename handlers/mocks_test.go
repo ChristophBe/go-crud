@@ -7,50 +7,56 @@ import (
 )
 
 type getOneServiceMock struct {
-	model modelMock
+	model testModel
 	err   error
 }
 
-func (m getOneServiceMock) GetOne(_ *http.Request) (types.Model, error) {
+func (m getOneServiceMock) GetOne(_ *http.Request) (testModel, error) {
 	return m.model, m.err
 }
 
 type getAllServiceMock struct {
-	models []types.Model
+	models []testModel
 	err    error
 }
 
-func (m getAllServiceMock) GetAll(_ *http.Request) ([]types.Model, error) {
+func (m getAllServiceMock) GetAll(_ *http.Request) ([]testModel, error) {
 	return m.models, m.err
 }
 
 type functionServiceMock struct {
 	functionErr    error
 	dtoErr         error
-	result         interface{}
+	result         any
 	responseStatus int
-	dto            types.Validatable
+	dto            dtoMock[any]
 }
 
-func (f functionServiceMock) Function(_ context.Context, _ types.Validatable) (interface{}, int, error) {
+func (f functionServiceMock) Function(_ context.Context, _ dtoMock[any]) (any, int, error) {
 	return f.result, f.responseStatus, f.functionErr
 }
-func (f functionServiceMock) ParseValidatableFromRequest(_ *http.Request) (types.Validatable, error) {
+func (f functionServiceMock) ParseValidatableFromRequest(_ *http.Request) (dtoMock[any], error) {
 	return f.dto, f.dtoErr
 }
 
-type modelErrorHolder struct {
-	model types.Model
+type modelErrorHolder[T any] struct {
+	model T
 	err   error
 }
-type dtoErrorHolder struct {
-	dto types.Dto
-	err error
+
+type updateModelServiceMock struct {
+	model testModel
+	err   error
 }
+
+func (u updateModelServiceMock) UpdateModel(_ context.Context, _ testModel) (testModel, error) {
+	return u.model, u.err
+}
+
 type modelMock struct {
 	value        string
-	createResult modelErrorHolder
-	updateResult modelErrorHolder
+	createResult modelErrorHolder[types.Model]
+	updateResult modelErrorHolder[types.Model]
 	deleteResult error
 }
 
@@ -93,15 +99,15 @@ func newMockResponseWriter(recorder *responseWriterRecorder, err error) types.Re
 	}
 }
 
-type dtoMock struct {
+type dtoMock[T any] struct {
 	validationError   error
-	assignModelResult modelErrorHolder
+	assignModelResult modelErrorHolder[T]
 }
 
-func (d dtoMock) IsValid(_ context.Context, _ bool) error {
+func (d dtoMock[T]) IsValid(_ context.Context, _ bool) error {
 	return d.validationError
 }
 
-func (d dtoMock) AssignToModel(_ context.Context, _ types.Model) (types.Model, error) {
+func (d dtoMock[T]) AssignToModel(_ context.Context, _ T) (T, error) {
 	return d.assignModelResult.model, d.assignModelResult.err
 }

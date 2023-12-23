@@ -6,7 +6,7 @@ import (
 )
 
 // NewUpdateHandler creates a http.Handler that handles partial updates for existing models.
-func NewUpdateHandler(service types.UpdateService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewUpdateHandler[M types.ModelTypeInterface](service types.UpdateService[M], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 		dto, err := service.ParseDtoFromRequest(request)
@@ -20,7 +20,7 @@ func NewUpdateHandler(service types.UpdateService, responseWriter types.Response
 			return
 		}
 
-		var model types.Model
+		var model M
 		if model, err = service.GetOne(request); err != nil {
 			errorWriter(err, writer, request)
 			return
@@ -32,7 +32,7 @@ func NewUpdateHandler(service types.UpdateService, responseWriter types.Response
 			return
 		}
 
-		if model, err = model.Update(ctx); err != nil {
+		if model, err = service.UpdateModel(ctx, model); err != nil {
 			errorWriter(err, writer, request)
 			return
 		}

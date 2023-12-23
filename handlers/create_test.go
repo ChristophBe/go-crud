@@ -9,12 +9,15 @@ import (
 	"testing"
 )
 
+type testModel struct {
+	Value string
+}
 type parseDtoFromRequestServiceMock struct {
-	dto types.Dto
+	dto types.Dto[testModel]
 	err error
 }
 
-func (p parseDtoFromRequestServiceMock) ParseDtoFromRequest(_ *http.Request) (types.Dto, error) {
+func (p parseDtoFromRequestServiceMock) ParseDtoFromRequest(_ *http.Request) (types.Dto[testModel], error) {
 	return p.dto, p.err
 }
 
@@ -26,8 +29,17 @@ func (c createEmptyModelServiceMock) CreateEmptyModel(_ context.Context) types.M
 	return c.emptyModel
 }
 
+type createModelServiceMock struct {
+	createdModel testModel
+	err          error
+}
+
+func (c createModelServiceMock) CreateModel(_ context.Context, _ testModel) (testModel, error) {
+	return c.createdModel, c.err
+}
+
 type createServiceMock struct {
-	createEmptyModelServiceMock
+	createModelServiceMock
 	parseDtoFromRequestServiceMock
 }
 
@@ -35,12 +47,16 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 
 	expectedResponseStatus := http.StatusAccepted
 
+	validModel := testModel{
+		Value: "value",
+	}
+
 	tt := []struct {
 		name                string
-		service             types.CreateService
+		service             types.CreateService[testModel]
 		responseWriterError error
 		expectedError       error
-		resultModel         modelMock
+		resultModel         testModel
 	}{
 		{
 			name: "parse dto form request turns error",
@@ -55,7 +71,7 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 			name: "dto is invalid",
 			service: createServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
+					dto: dtoMock[testModel]{
 						validationError: errors.New("test"),
 					},
 				},
@@ -66,8 +82,8 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 			name: "dto assign to model failed",
 			service: createServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
 							err: errors.New("test"),
 						},
 					},
@@ -79,15 +95,14 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 			name: "model save model failed",
 			service: createServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
-							model: modelMock{
-								createResult: modelErrorHolder{
-									err: errors.New("test"),
-								},
-							},
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
+							model: testModel{Value: "test"},
 						},
 					},
+				},
+				createModelServiceMock: createModelServiceMock{
+					err: errors.New("test"),
 				},
 			},
 			expectedError: errors.New("test"),
@@ -96,15 +111,9 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 			name: "response writer returns error",
 			service: createServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
-							model: modelMock{
-								createResult: modelErrorHolder{
-									model: modelMock{
-										value: "test-value",
-									},
-								},
-							},
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
+							model: validModel,
 						},
 					},
 				},
@@ -116,23 +125,18 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 			name: "success",
 			service: createServiceMock{
 				parseDtoFromRequestServiceMock: parseDtoFromRequestServiceMock{
-					dto: dtoMock{
-						assignModelResult: modelErrorHolder{
-							model: modelMock{
-								createResult: modelErrorHolder{
-									model: modelMock{
-										value: "test-value",
-									},
-								},
-							},
+					dto: dtoMock[testModel]{
+						assignModelResult: modelErrorHolder[testModel]{
+							model: validModel,
 						},
 					},
 				},
+				createModelServiceMock: createModelServiceMock{
+					createdModel: validModel,
+				},
 			},
 			expectedError: nil,
-			resultModel: modelMock{
-				value: "test-value",
-			},
+			resultModel:   validModel,
 		},
 	}
 
@@ -146,7 +150,7 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 
 			errorWriter := newMockErrorWriter(errorRecorder)
 
-			handler := NewCreatHandler(tc.service, responseWriter, errorWriter)
+			handler := NewCreateHandler[testModel](tc.service, responseWriter, errorWriter)
 			w := httptest.ResponseRecorder{}
 			handler.ServeHTTP(&w, new(http.Request))
 
@@ -168,13 +172,13 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 				if responseRecorder.status != expectedResponseStatus {
 					t.Errorf("expected response status to be %v, got %v", expectedResponseStatus, responseRecorder.status)
 				}
-				result, ok := responseRecorder.body.(modelMock)
+				result, ok := responseRecorder.body.(testModel)
 				if !ok {
 					t.Fatal("failed to cast model")
 				}
 
-				if tc.resultModel.value != result.value {
-					t.Errorf("expected result value to be %v, got %v", tc.resultModel.value, result.value)
+				if tc.resultModel.Value != result.Value {
+					t.Errorf("expected result value to be %v, got %v", tc.resultModel.Value, result.Value)
 				}
 
 			} else {
