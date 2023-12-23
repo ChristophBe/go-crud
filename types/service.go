@@ -19,12 +19,6 @@ type GetAllService[M ModelTypeInterface] interface {
 	GetAll(request *http.Request) ([]M, error)
 }
 
-// CreateEmptyModelService defines the CreateEmptyModel function that is used in multiple handlers.
-type CreateEmptyModelService interface {
-	// CreateEmptyModel returns an empty instance of the model
-	CreateEmptyModel(ctx context.Context) Model
-}
-
 type CreateModelService[M ModelTypeInterface] interface {
 	CreateModel(ctx context.Context, model M) (M, error)
 }
