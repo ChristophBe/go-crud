@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"github.com/ChristophBe/grud/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -84,7 +83,7 @@ func TestCrudHandlersImpl_GetAll(t *testing.T) {
 					t.Errorf("expected response status to be %v, got %v", expectedResponseStatus, responseRecorder.status)
 				}
 
-				resultModelList, ok := responseRecorder.body.([]types.Model)
+				resultModelList, ok := responseRecorder.body.([]testModel)
 				if !ok {
 					t.Error("response is not a slice of models")
 				}
