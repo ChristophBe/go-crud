@@ -34,17 +34,17 @@ func TestCrudHandlersImpl_GetAll(t *testing.T) {
 		{
 			name: "getAll returns a empty list",
 			getAllServiceMock: getAllServiceMock{
-				models: make([]types.Model, 0),
+				models: make([]testModel, 0),
 			},
 			expectedError: nil,
 		},
 		{
 			name: "getAll returns a list of models",
 			getAllServiceMock: getAllServiceMock{
-				models: []types.Model{
-					modelMock{value: "a"},
-					modelMock{value: "b"},
-					modelMock{value: "c"},
+				models: []testModel{
+					{Value: "a"},
+					{Value: "b"},
+					{Value: "c"},
 				},
 			},
 			expectedError: nil,
@@ -61,7 +61,7 @@ func TestCrudHandlersImpl_GetAll(t *testing.T) {
 
 			errorWriter := newMockErrorWriter(errorRecorder)
 
-			handler := NewGetAllHandler(tc.getAllServiceMock, responseWriter, errorWriter)
+			handler := NewGetAllHandler[testModel](tc.getAllServiceMock, responseWriter, errorWriter)
 			w := httptest.ResponseRecorder{}
 			handler.ServeHTTP(&w, new(http.Request))
 

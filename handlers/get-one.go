@@ -6,7 +6,7 @@ import (
 )
 
 // NewGetOneHandler returns a http handler for handling requests one specific model.
-func NewGetOneHandler(service types.GetOneService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewGetOneHandler[M types.ModelTypeInterface](service types.GetOneService[M], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		model, err := service.GetOne(r)
 		if err != nil {

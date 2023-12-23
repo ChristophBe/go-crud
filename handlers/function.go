@@ -6,7 +6,7 @@ import (
 )
 
 // NewFunctionHandler creates a http.Handler that handles the creation of a model
-func NewFunctionHandler(service types.FunctionHandlerService, responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewFunctionHandler[Dto types.Validatable, Result any](service types.FunctionHandlerService[Dto, Result], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 		dto, err := service.ParseValidatableFromRequest(request)

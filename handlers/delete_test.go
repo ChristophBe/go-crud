@@ -1,11 +1,25 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
+
+type deleteMockServiceMock struct {
+	deletionError error
+}
+
+func (d deleteMockServiceMock) DeleteModel(_ context.Context, _ testModel) error {
+	return d.deletionError
+}
+
+type deleteServiceMock struct {
+	getOneServiceMock
+	deleteMockServiceMock
+}
 
 func TestCrudHandlersImpl_Delete(t *testing.T) {
 
@@ -13,28 +27,38 @@ func TestCrudHandlersImpl_Delete(t *testing.T) {
 
 	tt := []struct {
 		name string
-		getOneServiceMock
+		deleteServiceMock
 		responseWriterError error
 		expectedError       error
 	}{
 		{
 			name: "service returns error",
-			getOneServiceMock: getOneServiceMock{
-				err: errors.New("test"),
+			deleteServiceMock: deleteServiceMock{
+				getOneServiceMock: getOneServiceMock{
+					err: errors.New("test"),
+				},
 			},
 			expectedError: errors.New("test"),
 		},
 		{
-			name:                "response writer returns error",
-			getOneServiceMock:   getOneServiceMock{},
+			name: "response writer returns error",
+			deleteServiceMock: deleteServiceMock{
+				getOneServiceMock: getOneServiceMock{},
+			},
 			responseWriterError: errors.New("test-error"),
 			expectedError:       errors.New("test-error"),
 		},
 		{
 			name: "delete function returns error",
-			getOneServiceMock: getOneServiceMock{
-				model: modelMock{deleteResult: errors.New("test-error")},
+			deleteServiceMock: deleteServiceMock{
+				getOneServiceMock: getOneServiceMock{
+					model: testModel{"test-value"},
+				},
+				deleteMockServiceMock: deleteMockServiceMock{
+					deletionError: errors.New("test-error"),
+				},
 			},
+
 			expectedError: errors.New("test-error"),
 		},
 		{
@@ -53,7 +77,7 @@ func TestCrudHandlersImpl_Delete(t *testing.T) {
 
 			errorWriter := newMockErrorWriter(errorRecorder)
 
-			handler := NewDeleteHandler(tc.getOneServiceMock, responseWriter, errorWriter)
+			handler := NewDeleteHandler[testModel](tc.deleteServiceMock, responseWriter, errorWriter)
 			w := httptest.ResponseRecorder{}
 			handler.ServeHTTP(&w, new(http.Request))
 
