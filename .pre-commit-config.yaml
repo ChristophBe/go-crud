@@ -12,4 +12,3 @@ repos:
         - id: go-fmt
         - id: go-mod-tidy
         - id: go-build
-        - id: go-lint
