@@ -31,9 +31,9 @@ type DeleteModelService[M ModelTypeInterface] interface {
 }
 
 // ParseDtoFromRequestService defines the ParseDtoFromRequest function that is used in multiple handlers.
-type ParseDtoFromRequestService[M ModelTypeInterface] interface {
+type ParseDtoFromRequestService[M ModelTypeInterface, D Dto[M]] interface {
 	// ParseDtoFromRequest creates a dto instance based on a request
-	ParseDtoFromRequest(request *http.Request) (Dto[M], error)
+	ParseDtoFromRequest(request *http.Request) (D, error)
 }
 
 // FunctionHandlerService defines a service to handle a request by a  Function
@@ -50,28 +50,28 @@ type DeleteService[M ModelTypeInterface] interface {
 }
 
 // CreateService defines functions that are need for the create model handler
-type CreateService[M ModelTypeInterface] interface {
+type CreateService[M ModelTypeInterface, D Dto[M]] interface {
 	CreateModelService[M]
-	ParseDtoFromRequestService[M]
+	ParseDtoFromRequestService[M, D]
 }
 
 // UpdateService defines functions that are need for the update model handler
-type UpdateService[M ModelTypeInterface] interface {
+type UpdateService[M ModelTypeInterface, D Dto[M]] interface {
 	UpdateModelService[M]
 	GetOneService[M]
-	ParseDtoFromRequestService[M]
+	ParseDtoFromRequestService[M, D]
 }
 
 // ReplaceService defines functions that are need for the replace model handler
-type ReplaceService[M ModelTypeInterface] interface {
+type ReplaceService[M ModelTypeInterface, D Dto[M]] interface {
 	UpdateModelService[M]
 	GetOneService[M]
-	ParseDtoFromRequestService[M]
+	ParseDtoFromRequestService[M, D]
 }
 
 // Service holds functions to retrieve Model instances  or create Dto objects.
-type Service[M ModelTypeInterface] interface {
-	ParseDtoFromRequestService[M]
+type Service[M ModelTypeInterface, D Dto[M]] interface {
+	ParseDtoFromRequestService[M, D]
 	CreateModelService[M]
 	UpdateModelService[M]
 	GetOneService[M]

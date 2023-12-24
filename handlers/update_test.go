@@ -20,7 +20,7 @@ func TestCrudHandlersImpl_Update(t *testing.T) {
 
 	tt := []struct {
 		name                string
-		service             types.UpdateService[testModel]
+		service             types.UpdateService[testModel, dtoMock[testModel]]
 		responseWriterError error
 		expectedError       error
 		resultModel         testModel
