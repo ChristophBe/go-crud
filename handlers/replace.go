@@ -6,7 +6,7 @@ import (
 )
 
 // NewReplaceHandler creates a http.Handler that handles replacing an exing model.
-func NewReplaceHandler[M types.ModelTypeInterface](service types.ReplaceService[M], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewReplaceHandler[M types.ModelTypeInterface, D types.Dto[M]](service types.ReplaceService[M, D], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 

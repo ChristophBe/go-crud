@@ -6,7 +6,7 @@ import (
 )
 
 // NewCreateHandler creates a http.Handler that handles the creation of a model
-func NewCreateHandler[Model any](service types.CreateService[Model], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
+func NewCreateHandler[Model types.ModelTypeInterface, Dto types.Dto[Model]](service types.CreateService[Model, Dto], responseWriter types.ResponseWriter, errorWriter types.ErrorResponseWriter) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 		dto, err := service.ParseDtoFromRequest(request)

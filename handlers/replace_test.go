@@ -20,7 +20,7 @@ func TestCrudHandlersImpl_Replace(t *testing.T) {
 
 	tt := []struct {
 		name                string
-		service             types.ReplaceService[testModel]
+		service             types.ReplaceService[testModel, dtoMock[testModel]]
 		responseWriterError error
 		expectedError       error
 		resultModel         testModel

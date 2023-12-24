@@ -13,11 +13,11 @@ type testModel struct {
 	Value string
 }
 type parseDtoFromRequestServiceMock struct {
-	dto types.Dto[testModel]
+	dto dtoMock[testModel]
 	err error
 }
 
-func (p parseDtoFromRequestServiceMock) ParseDtoFromRequest(_ *http.Request) (types.Dto[testModel], error) {
+func (p parseDtoFromRequestServiceMock) ParseDtoFromRequest(_ *http.Request) (dtoMock[testModel], error) {
 	return p.dto, p.err
 }
 
@@ -45,7 +45,7 @@ func TestCrudHandlersImpl_Create(t *testing.T) {
 
 	tt := []struct {
 		name                string
-		service             types.CreateService[testModel]
+		service             types.CreateService[testModel, dtoMock[testModel]]
 		responseWriterError error
 		expectedError       error
 		resultModel         testModel

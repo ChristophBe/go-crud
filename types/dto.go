@@ -1,6 +1,8 @@
 package types
 
-import "context"
+import (
+	"context"
+)
 
 // Validatable is an interface that makes sure the typ can be validated.
 type Validatable interface {
@@ -12,7 +14,7 @@ type Validatable interface {
 
 // Dto is the type that contains the structure of the data that your api expect to receive.
 // It contains a method to validate itself and to convert it to its corresponding model object.
-type Dto[Model any] interface {
+type Dto[Model ModelTypeInterface] interface {
 	Validatable
 
 	// AssignToModel assigns the value of the dto to a Model.
